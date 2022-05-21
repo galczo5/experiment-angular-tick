@@ -1,22 +1,36 @@
-import {ApplicationRef, ChangeDetectorRef, Component, DoCheck, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {
+  ApplicationRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DoCheck,
+  Input,
+  OnChanges, OnDestroy, OnInit
+} from '@angular/core';
 import {interval, Subject, takeUntil} from "rxjs";
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-child',
   template: `
     <div style="padding: 10px; border: 1px solid;">
-      <h1>Parent [{{timestamp}}]</h1>
+      <h1>Child {{id}} [{{timestamp}}]</h1>
       <button (click)="tick()">tick()</button>
       <button (click)="detect()">detectChanges()</button>
       <hr>
       <div style="display: flex; gap: 10px;">
-        <app-child style="flex-grow: 1" id="1"></app-child>
-        <app-child style="flex-grow: 1" id="2" [childIds]="['3', '4']"></app-child>
+        <app-child style="flex-grow: 1" *ngFor="let childId of childIds" [id]="childId"></app-child>
       </div>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit, DoCheck, OnChanges, OnDestroy {
+export class ChildComponent implements OnInit, DoCheck, OnChanges, OnDestroy {
+
+  @Input()
+  id: string | undefined;
+
+  @Input()
+  childIds: Array<string> = [];
 
   timestamp: number = 0;
 
@@ -39,7 +53,7 @@ export class AppComponent implements OnInit, DoCheck, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-    console.log('ngOnInit', 'AppComponent');
+    console.log('ngOnInit', 'ChildComponent', this.id);
 
     interval(1000)
       .pipe(
@@ -50,18 +64,18 @@ export class AppComponent implements OnInit, DoCheck, OnChanges, OnDestroy {
       });
   }
 
+  ngOnChanges() {
+    console.log('ngOnChanges', 'ChildComponent', this.id);
+  }
+
   ngOnDestroy() {
-    console.log('ngOnDestroy', 'AppComponent');
+    console.log('ngOnDestroy', 'ChildComponent', this.id);
 
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  ngOnChanges() {
-    console.log('ngOnChanges', 'AppComponent');
-  }
-
   ngDoCheck() {
-    console.log('ngDoCheck', 'AppComponent');
+    console.log('ngDoCheck', 'ChildComponent', this.id);
   }
 }
